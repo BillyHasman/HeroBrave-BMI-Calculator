@@ -264,7 +264,7 @@ export function BMICalculator() {
             <Button
               onClick={calculateBMI}
               disabled={isCalculating}
-              className='flex-1 h-12 text-base font-medium transition-colors duration-200'
+              className='flex-1 h-12 text-base font-medium transition-colors duration-200 bg-primary hover:bg-green-600'
             >
               {isCalculating ? (
                 <>

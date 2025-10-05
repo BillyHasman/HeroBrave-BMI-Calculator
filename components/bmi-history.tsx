@@ -156,7 +156,7 @@ export function BMIHistory() {
           BMI History ({history.length})
         </CardTitle>
         <Button
-          variant='outline'
+          variant='destructive'
           size='sm'
           onClick={clearHistory}
           className='text-destructive hover:bg-destructive/10 transition-colors duration-200 bg-transparent'
