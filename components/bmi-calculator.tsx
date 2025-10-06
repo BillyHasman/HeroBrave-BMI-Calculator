@@ -21,7 +21,13 @@ interface BMIData {
   date: string
 }
 
-export function BMICalculator() {
+export function BMICalculator({
+  onRevealDone,
+  onCalculationStart,
+}: {
+  onRevealDone?: () => void
+  onCalculationStart?: () => void
+}) {
   const [formData, setFormData] = useState({
     name: '',
     dateOfBirth: '',
@@ -33,6 +39,8 @@ export function BMICalculator() {
   const [isCalculating, setIsCalculating] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const debounceTimeoutRef = useRef<NodeJS.Timeout>()
+  const resultRef = useRef<HTMLDivElement | null>(null)
+  const pendingResultRef = useRef<BMIData | null>(null)
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {}
@@ -85,7 +93,12 @@ export function BMICalculator() {
   }, [])
 
   const calculateBMI = useCallback(() => {
-    if (!validateForm()) return
+    setIsCalculating(true)
+
+    if (!validateForm()) {
+      setIsCalculating(false)
+      return
+    }
 
     const height = Number.parseFloat(formData.height) / 100
     const weight = Number.parseFloat(formData.weight)
@@ -109,6 +122,9 @@ export function BMICalculator() {
       date: new Date().toLocaleDateString(),
     }
 
+    onCalculationStart?.()
+
+    pendingResultRef.current = newResult
     setResult(newResult)
 
     setFormData({
@@ -120,32 +136,11 @@ export function BMICalculator() {
     })
     setErrors({})
 
-    if ('requestIdleCallback' in window) {
-      requestIdleCallback(() => {
-        try {
-          const existingHistory = JSON.parse(
-            localStorage.getItem('bmiHistory') || '[]'
-          )
-          const updatedHistory = [newResult, ...existingHistory.slice(0, 9)]
-          localStorage.setItem('bmiHistory', JSON.stringify(updatedHistory))
-        } catch (error) {
-          console.error('Failed to save to localStorage:', error)
-        }
-      })
-    } else {
-      setTimeout(() => {
-        try {
-          const existingHistory = JSON.parse(
-            localStorage.getItem('bmiHistory') || '[]'
-          )
-          const updatedHistory = [newResult, ...existingHistory.slice(0, 9)]
-          localStorage.setItem('bmiHistory', JSON.stringify(updatedHistory))
-        } catch (error) {
-          console.error('Failed to save to localStorage:', error)
-        }
-      }, 0)
-    }
-  }, [formData, validateForm])
+    setTimeout(() => {
+      resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setIsCalculating(false)
+    }, 50)
+  }, [formData, validateForm, onCalculationStart])
 
   const resetForm = useCallback(() => {
     setFormData({
@@ -264,7 +259,7 @@ export function BMICalculator() {
             <Button
               onClick={calculateBMI}
               disabled={isCalculating}
-              className='flex-1 h-12 text-base font-medium transition-colors duration-200 bg-primary hover:bg-green-600'
+              className='flex-1 h-12 text-base font-medium transition-colors duration-200'
             >
               {isCalculating ? (
                 <>
@@ -279,9 +274,8 @@ export function BMICalculator() {
               )}
             </Button>
             <Button
-              variant='outline'
               onClick={resetForm}
-              className='px-8 h-12 transition-colors duration-200 bg-transparent'
+              className='px-8 h-12 transition-colors duration-200 text-muted-foreground border-1 bg-transparent hover:bg-gray-100'
             >
               Reset
             </Button>
@@ -290,8 +284,41 @@ export function BMICalculator() {
       </Card>
 
       {result && (
-        <div className='performance-optimized animate-fade-in'>
-          <BMIResult data={result} />
+        <div
+          id='bmi-result-section'
+          ref={resultRef}
+          className='performance-optimized animate-fade-in'
+        >
+          <BMIResult
+            data={result}
+            onRevealDone={() => {
+              const revealed = pendingResultRef.current
+              if (revealed) {
+                try {
+                  const existingHistory = JSON.parse(
+                    localStorage.getItem('bmiHistory') || '[]'
+                  )
+                  const updatedHistory = [
+                    revealed,
+                    ...existingHistory.slice(0, 9),
+                  ]
+                  localStorage.setItem(
+                    'bmiHistory',
+                    JSON.stringify(updatedHistory)
+                  )
+                } catch (error) {
+                  console.error('Failed to save to localStorage:', error)
+                }
+                try {
+                  window.dispatchEvent(new CustomEvent('bmiHistoryUpdated'))
+                } catch (e) {
+                  // ignore
+                }
+                pendingResultRef.current = null
+              }
+              onRevealDone?.()
+            }}
+          />
         </div>
       )}
     </div>

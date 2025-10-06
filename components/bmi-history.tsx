@@ -86,26 +86,35 @@ const HistoryRow = memo(function HistoryRow({
 export function BMIHistory() {
   const [history, setHistory] = useState<BMIData[]>([])
 
-  useEffect(() => {
-    const loadHistory = () => {
-      try {
-        const savedHistory = localStorage.getItem('bmiHistory')
-        if (savedHistory) {
-          setHistory(JSON.parse(savedHistory))
-        }
-      } catch (error) {
-        console.error('Failed to load history:', error)
+  const loadHistory = useCallback(() => {
+    try {
+      const savedHistory = localStorage.getItem('bmiHistory')
+      if (savedHistory) {
+        setHistory(JSON.parse(savedHistory))
+      } else {
+        setHistory([])
       }
+    } catch (error) {
+      console.error('Failed to load history:', error)
     }
+  }, [])
 
+  useEffect(() => {
     loadHistory()
+
+    const handleUpdated = () => loadHistory()
+    window.addEventListener('bmiHistoryUpdated', handleUpdated as EventListener)
 
     const interval = setInterval(loadHistory, 2000)
 
     return () => {
+      window.removeEventListener(
+        'bmiHistoryUpdated',
+        handleUpdated as EventListener
+      )
       clearInterval(interval)
     }
-  }, [])
+  }, [loadHistory])
 
   const clearHistory = useCallback(() => {
     try {

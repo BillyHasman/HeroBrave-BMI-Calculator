@@ -1,5 +1,5 @@
 'use client'
-import { memo, useMemo } from 'react'
+import { memo, useMemo, useEffect, useState } from 'react'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -19,9 +19,14 @@ interface BMIData {
 
 interface BMIResultProps {
   data: BMIData
+  // notify parent when number/badges/details are revealed
+  onRevealDone?: () => void
 }
 
-export const BMIResult = memo(function BMIResult({ data }: BMIResultProps) {
+export const BMIResult = memo(function BMIResult({
+  data,
+  onRevealDone,
+}: BMIResultProps) {
   const getBMIColor = (bmi: number) => {
     if (bmi < 18.5) return 'text-pink-600'
     if (bmi < 25) return 'text-green-600'
@@ -90,6 +95,38 @@ export const BMIResult = memo(function BMIResult({ data }: BMIResultProps) {
     return 'bg-red-500'
   }, [data.bmi])
 
+  // wait 1s before starting the bar animation
+  // show the numeric BMI only after the bar finishes animating
+  const [progressStarted, setProgressStarted] = useState(false)
+  const [showNumber, setShowNumber] = useState(false)
+
+  const delayMs = 1000 // 1s before progress starts
+  const animMs = 2000 // 2s progress animation duration (slower per request)
+
+  useEffect(() => {
+    setProgressStarted(false)
+    setShowNumber(false)
+
+    const delayTimer = setTimeout(() => {
+      setProgressStarted(true)
+    }, delayMs)
+
+    const revealTimer = setTimeout(() => {
+      setShowNumber(true)
+    }, delayMs + animMs)
+
+    return () => {
+      clearTimeout(delayTimer)
+      clearTimeout(revealTimer)
+    }
+  }, [data.id, data.bmi, delayMs, animMs])
+
+  useEffect(() => {
+    if (showNumber) {
+      onRevealDone?.()
+    }
+  }, [showNumber, onRevealDone])
+
   return (
     <Card className='shadow-lg border-0 bg-card performance-optimized'>
       <CardHeader className='text-center pb-4'>
@@ -99,25 +136,37 @@ export const BMIResult = memo(function BMIResult({ data }: BMIResultProps) {
         {/* BMI Score Display */}
         <div className='text-center space-y-4'>
           <div className='space-y-2'>
+            {/* show numeric BMI only after progress animation finishes */}
             <div className={`text-6xl font-bold ${getBMIColor(data.bmi)}`}>
-              {data.bmi}
+              {showNumber ? data.bmi : '--'}
             </div>
-            <Badge
-              variant={getBMIBadgeVariant(data.category)}
-              className='text-sm px-4 py-1 flex items-center gap-2 w-fit mx-auto'
-            >
-              {getBMIIcon(data.category)}
-              {data.category}
-            </Badge>
+
+            {/* show badge only after number appears */}
+            {showNumber && (
+              <Badge
+                variant={getBMIBadgeVariant(data.category)}
+                className='text-sm px-4 py-1 flex items-center gap-2 w-fit mx-auto animate-fade-in'
+              >
+                {getBMIIcon(data.category)}
+                {data.category}
+              </Badge>
+            )}
           </div>
 
           {/* BMI Meter */}
           <div className='space-y-2'>
             <div className='w-full bg-muted rounded-full h-4 overflow-hidden'>
               <div
-                className={`h-full rounded-full animate-progress-fill ${meterColor}`}
+                className={`h-full rounded-full ${meterColor}`}
+                // drive animation via inline styles with custom duration; transform-based for performance
                 style={{
                   width: `${meterFillPercentage}%`,
+                  transformOrigin: 'left',
+                  transform: progressStarted ? undefined : 'scaleX(0)',
+                  animationName: progressStarted ? 'progressFill' : undefined,
+                  animationDuration: `${animMs}ms`,
+                  animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                  animationFillMode: 'forwards',
                 }}
               />
             </div>
@@ -130,35 +179,40 @@ export const BMIResult = memo(function BMIResult({ data }: BMIResultProps) {
           </div>
         </div>
 
-        {/* Personal Info Summary */}
-        <div className='grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg'>
-          <div className='text-center'>
-            <div className='text-sm text-muted-foreground'>Name</div>
-            <div className='font-medium'>{data.name}</div>
-          </div>
-          <div className='text-center'>
-            <div className='text-sm text-muted-foreground'>Gender</div>
-            <div className='font-medium capitalize'>{data.gender}</div>
-          </div>
-          <div className='text-center'>
-            <div className='text-sm text-muted-foreground'>Height</div>
-            <div className='font-medium'>{data.height} cm</div>
-          </div>
-          <div className='text-center'>
-            <div className='text-sm text-muted-foreground'>Weight</div>
-            <div className='font-medium'>{data.weight} kg</div>
-          </div>
-        </div>
+        {/* Delay other result details until number is revealed */}
+        {showNumber && (
+          <>
+            {/* Personal Info Summary */}
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg animate-fade-in'>
+              <div className='text-center'>
+                <div className='text-sm text-muted-foreground'>Name</div>
+                <div className='font-medium'>{data.name}</div>
+              </div>
+              <div className='text-center'>
+                <div className='text-sm text-muted-foreground'>Gender</div>
+                <div className='font-medium capitalize'>{data.gender}</div>
+              </div>
+              <div className='text-center'>
+                <div className='text-sm text-muted-foreground'>Height</div>
+                <div className='font-medium'>{data.height} cm</div>
+              </div>
+              <div className='text-center'>
+                <div className='text-sm text-muted-foreground'>Weight</div>
+                <div className='font-medium'>{data.weight} kg</div>
+              </div>
+            </div>
 
-        {/* Health Advice */}
-        <div className='p-4 bg-primary/5 border border-primary/20 rounded-lg'>
-          <h4 className='font-semibold text-primary mb-2'>
-            Health Recommendation
-          </h4>
-          <p className='text-sm text-muted-foreground leading-relaxed'>
-            {getBMIAdvice(data.category)}
-          </p>
-        </div>
+            {/* Health Advice */}
+            <div className='p-4 bg-primary/5 border border-primary/20 rounded-lg animate-fade-in'>
+              <h4 className='font-semibold text-primary mb-2'>
+                Health Recommendation
+              </h4>
+              <p className='text-sm text-muted-foreground leading-relaxed'>
+                {getBMIAdvice(data.category)}
+              </p>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   )
