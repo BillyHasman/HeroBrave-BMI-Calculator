@@ -28,7 +28,7 @@ export const GenderSelector = memo(function GenderSelector({
           className={`h-16 flex flex-col items-center gap-2 transition-colors duration-200 ${
             value === 'male'
               ? 'bg-primary text-primary-foreground shadow-lg hover:bg-primary/90'
-              : 'hover:bg-primary/10 hover:border-primary'
+              : 'hover:bg-primary/10 hover:border-primary hover:text-primary'
           }`}
         >
           <User className='h-6 w-6' />
