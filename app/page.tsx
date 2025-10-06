@@ -12,7 +12,9 @@ export default function LandingPage() {
             <span className='inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary/10'>
               <HeartPulse className='h-5 w-5 text-primary' />
             </span>
-            <span className='font-semibold'>BMI Calculator</span>
+            <span className='font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
+              BMI Calculator
+            </span>
           </Link>
           <div className='flex items-center gap-3'>
             <Link href='/calculator'>
