@@ -135,6 +135,9 @@
   body {
     @apply bg-background text-foreground;
   }
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* Optimized animations with reduced complexity and shorter durations */
