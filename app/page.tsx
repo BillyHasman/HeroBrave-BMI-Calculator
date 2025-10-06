@@ -19,7 +19,7 @@ export default function LandingPage() {
           <div className='flex items-center gap-3'>
             <Link href='/calculator'>
               <Button size='sm' className='gap-1'>
-                Try this site
+                Try the App
                 <ArrowRight className='h-4 w-4' />
               </Button>
             </Link>
@@ -34,7 +34,7 @@ export default function LandingPage() {
             <Activity className='h-6 w-6 text-primary' />
           </div>
           <h1 className='text-3xl md:text-5xl font-bold text-pretty'>
-            Understand Your Health, Start with BMI
+            Understand Your Health, Starting with BMI
           </h1>
           <p className='mt-3 text-muted-foreground text-pretty'>
             Calculate your Body Mass Index (BMI) quickly to understand your
@@ -43,14 +43,14 @@ export default function LandingPage() {
           <div className='mt-6 flex flex-col sm:flex-row items-center justify-center gap-3'>
             <Link href='/calculator'>
               <Button size='lg' className='px-6'>
-                Try the website now
+                Try the App Now
                 <ArrowRight className='ml-2 h-4 w-4' />
               </Button>
             </Link>
           </div>
           <div className='mt-2'>
             <a
-              href='#tentang-bmi'
+              href='#about-bmi'
               className='text-sm underline-offset-4 hover:underline'
             >
               Learn about BMI
@@ -60,27 +60,25 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits / Intro */}
-      <section
-        id='tentang-bmi'
-        className='container mx-auto px-4 py-8 md:py-12'
-      >
+      <section id='about-bmi' className='container mx-auto px-4 py-8 md:py-12'>
         <div className='grid gap-4 md:grid-cols-3'>
           <div className='rounded-xl border border-border bg-card p-5'>
             <div className='mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10'>
               <Scale className='h-5 w-5 text-primary' />
             </div>
-            <h3 className='font-semibold'>Quick BMI Calculation</h3>
+            <h3 className='font-semibold'>Calculate BMI Quickly</h3>
             <p className='mt-1 text-sm text-muted-foreground'>
-              Enter height, weight, and gender to get BMI and its category.
+              Enter your height, weight, and gender to get your BMI and
+              category.
             </p>
           </div>
           <div className='rounded-xl border border-border bg-card p-5'>
             <div className='mb-3 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10'>
               <Activity className='h-5 w-5 text-secondary' />
             </div>
-            <h3 className='font-semibold'>Monitor Your Health</h3>
+            <h3 className='font-semibold'>Track Your Health</h3>
             <p className='mt-1 text-sm text-muted-foreground'>
-              Get a quick overview of your weight status and maintain healthy
+              Get a quick snapshot of your weight status and keep healthy
               habits.
             </p>
           </div>
@@ -90,7 +88,7 @@ export default function LandingPage() {
             </div>
             <h3 className='font-semibold'>Easy to Understand</h3>
             <p className='mt-1 text-sm text-muted-foreground'>
-              BMI results are displayed clearly with simple colors and
+              BMI results are presented clearly with helpful colors and simple
               explanations.
             </p>
           </div>
