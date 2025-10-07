@@ -33,7 +33,7 @@ export default function LandingPage() {
           <div className='mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10'>
             <Activity className='h-6 w-6 text-primary' />
           </div>
-          <h1 className='text-3xl md:text-5xl font-bold text-pretty'>
+          <h1 className='text-3xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
             Understand Your Health, Starting with BMI
           </h1>
           <p className='mt-3 text-muted-foreground text-pretty'>
