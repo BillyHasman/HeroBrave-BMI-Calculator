@@ -19,6 +19,7 @@ export default function RootLayout({
       <link rel='icon' href='logo.png' />
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         {children}
+        {/* Add Vercel Analytics for tracking */}
         <Analytics />
       </body>
     </html>
